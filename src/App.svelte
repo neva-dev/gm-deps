@@ -7,28 +7,14 @@
 	});
 
 	let mavenInvalid = false;
-	let mavenText = `<dependency>
-    <groupId>org.jsoup</groupId>
-    <artifactId>jsoup</artifactId>
-    <version>$\{jsoup.version}</version>
-    <classifier>apis</classifier>
-</dependency>
-<dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-api</artifactId>
-    <version>5.4.2</version>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.adobe.cq</groupId>
-    <artifactId>core.wcm.components.content</artifactId>
-    <version>2.11.1</version>
-    <type>zip</type>
-    <scope>runtime</scope>
-</dependency>`.trim();
+	let mavenText = '';
 
 	let gradleInvalid = false;
-	let gradleText = '';
+	let gradleText = `
+implementation("org.jsoup:jsoup:$\{properties["jsoup.version"]}:apis")
+testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
+	`.trim()
 
 	function mapMavenScope(value) {
 		return {
@@ -120,9 +106,12 @@
 
 	function mapGradleScope(value) {
 		return {
+			api: null,
+			compile: null,
+			compileOnly: 'provided',
 			implementation: null,
 			runtimeOnly: 'runtime',
-			compileOnly: 'provided',
+			runtime: 'runtime',
 			testImplementation: 'test'
 		}[value];
 	}
@@ -157,7 +146,7 @@
 		}
 	}
 
-	mavenUpdate();
+	gradleUpdate();
 </script>
 
 <main>
@@ -171,7 +160,7 @@
 				<FormGroup>
 					<Label for="mavenText"><strong>Maven</strong></Label>
 					<p class="codeFont">&lt;dependencies&gt;<p>
-					<Input type="textarea" name="text" id="mavenText" class="codeFont codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
+					<Input readonly="false" type="textarea" name="text" id="mavenText" class="codeFont codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
 					<p class="codeFont">&lt;/dependencies&gt;</p>
 				</FormGroup>
 			</Col>
@@ -179,7 +168,7 @@
 				<FormGroup>
 					<Label for="gradleText"><strong>Gradle (Kotlin DSL)</strong></Label>
 					<p class="codeFont">dependencies &lbrace;<p>
-					<Input type="textarea" name="text" id="gradleText" class="codeFont codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
+					<Input readonly="false" type="textarea" name="text" id="gradleText" class="codeFont codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
 					<p class="codeFont">&rbrace;</p>
 				</FormGroup>
 			</Col>
