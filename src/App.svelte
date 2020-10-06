@@ -39,13 +39,28 @@
 		}[value] || 'implementation';
 	}
 
+	function mapMavenProperties(value) {
+		const pattern = /\${([^}]+)}/g
+		const matches = value.match(pattern)
+
+		let result = value;
+		if (matches) {
+			matches.forEach(m => {
+				const varName = m.substring(2, m.length - 1);
+				result = result.replace(m, '${properties["'+ varName +'"]}');
+			})
+		}
+
+		return result;
+	}
+
 	function mavenUpdate() {
 		mavenInvalid = false
 		try {
 			let xml = xmlParser.parse(mavenText);
 			let deps = xml.dependency instanceof Array ? xml.dependency : [xml.dependency];
 
-			gradleText = deps.filter(dep => dep.groupId && dep.artifactId && dep.version)
+			gradleText = mapMavenProperties(deps.filter(dep => dep.groupId && dep.artifactId && dep.version)
 					.map(dep => {
 						let scope = mapMavenScope(dep.scope);
 						let result = `${dep.groupId}:${dep.artifactId}:${dep.version}`;
@@ -56,7 +71,7 @@
 							result = `${result}@${dep.type}`;
 						}
 						return `${scope}("${result}")`
-					}).join("\n");
+					}).join("\n"));
 		} catch (e) {
 			mavenInvalid = true
 		}
@@ -112,6 +127,21 @@
 		}[value];
 	}
 
+	function mapGradleProperties(value) {
+		const pattern = /\${([^}]+)}/g
+		const matches = value.match(pattern)
+
+		let result = value;
+		if (matches) {
+			matches.forEach(m => {
+				const varName = m.substring(14, m.length - 3);
+				result = result.replace(m, '${' + varName + '}');
+			})
+		}
+
+		return result;
+	}
+
 	function filterNulls(obj) {
 		return Object.entries(obj).reduce((a,[k,v]) => (v == null ? a : (a[k]=v, a)), {})
 	}
@@ -119,9 +149,9 @@
 	function gradleUpdate() {
 		gradleInvalid = false;
 		try {
-			mavenText = xmlComposer.parse({
+			mavenText = mapGradleProperties(xmlComposer.parse({
 				dependency: parseGradleLines(gradleText)
-			});
+			}));
 		} catch (e) {
 			gradleInvalid = true;
 		}
@@ -147,7 +177,7 @@
 			</Col>
 			<Col>
 				<FormGroup>
-					<Label for="gradleText"><strong>Gradle</strong></Label>
+					<Label for="gradleText"><strong>Gradle (Kotlin DSL)</strong></Label>
 					<p>dependencies &lbrace;<p>
 					<Input type="textarea" name="text" id="gradleText" class="codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
 					<p>&rbrace;</p>
