@@ -1,6 +1,10 @@
 <script>
 	import { Jumbotron, Label, Input, FormGroup, Button, Col, Container, Row } from 'sveltestrap';
-	import parser from 'fast-xml-parser';
+	import xmlParser from 'fast-xml-parser';
+	const xmlComposer = new xmlParser.j2xParser({
+		format: true,
+		indentBy: "    ",
+	});
 
 	let mavenInvalid = false;
 	let mavenText = `<dependency>
@@ -10,17 +14,17 @@
     <classifier>apis</classifier>
 </dependency>
 <dependency>
-	<groupId>org.junit.jupiter</groupId>
-	<artifactId>junit-jupiter-api</artifactId>
-	<version>5.4.2</version>
-	<scope>test</scope>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.4.2</version>
+    <scope>test</scope>
 </dependency>
- <dependency>
-	<groupId>com.adobe.cq</groupId>
-	<artifactId>core.wcm.components.content</artifactId>
-	<version>2.11.1</version>
-	<type>zip</type>
-	<scope>runtime</scope>
+<dependency>
+    <groupId>com.adobe.cq</groupId>
+    <artifactId>core.wcm.components.content</artifactId>
+    <version>2.11.1</version>
+    <type>zip</type>
+    <scope>runtime</scope>
 </dependency>`.trim();
 
 	let gradleInvalid = false;
@@ -38,7 +42,7 @@
 	function mavenUpdate() {
 		mavenInvalid = false
 		try {
-			let xml = parser.parse(mavenText);
+			let xml = xmlParser.parse(mavenText);
 			let deps = xml.dependency instanceof Array ? xml.dependency : [xml.dependency];
 
 			gradleText = deps.filter(dep => dep.groupId && dep.artifactId && dep.version)
@@ -75,35 +79,49 @@
 		for (const pattern of patterns) {
 			values = line.match(pattern);
 			if (values != null) {
-				return {
-					scope: values[1],
-					dependency: parseGradleDependency(values[2])
-				}
+				return parseGradleDependency(values[1], values[2])
 			}
 		}
 		throw new Error(`Cannot parse Gradle line '${line}'!`);
 	}
 
-	function parseGradleDependency(value) {
-		let extension = null;
+	function parseGradleDependency(scope, value) {
+		let type = null;
 		if (value.includes("@")) {
 			let parts = value.split("@");
 			value = parts[0];
-			extension = parts[1];
+			type = parts[1];
 		}
 
 		let parts = value.split(":")
 		let groupId = parts[0];
 		let artifactId = parts[1];
 		let version = parts[2];
+		let classifier = parts[3];
+		scope = mapGradleScope(scope)
 
-		return { groupId, artifactId, version, extension };
+		return filterNulls({ groupId, artifactId, version, classifier, type, scope });
+	}
+
+	function mapGradleScope(value) {
+		return {
+			implementation: null,
+			runtimeOnly: 'runtime',
+			compileOnly: 'provided',
+			testImplementation: 'test'
+		}[value];
+	}
+
+	function filterNulls(obj) {
+		return Object.entries(obj).reduce((a,[k,v]) => (v == null ? a : (a[k]=v, a)), {})
 	}
 
 	function gradleUpdate() {
 		gradleInvalid = false;
 		try {
-			console.log(parseGradleLines(gradleText));
+			mavenText = xmlComposer.parse({
+				dependency: parseGradleLines(gradleText)
+			});
 		} catch (e) {
 			gradleInvalid = true;
 		}
