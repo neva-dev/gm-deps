@@ -112,6 +112,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 			implementation: null,
 			runtimeOnly: 'runtime',
 			runtime: 'runtime',
+			testApi: 'test',
 			testImplementation: 'test'
 		}[value];
 	}
