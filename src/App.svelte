@@ -10,7 +10,7 @@
 	let mavenText = `<dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
-    <version>1.13.1</version>
+    <version>$\{jsoup.version}</version>
     <classifier>apis</classifier>
 </dependency>
 <dependency>
