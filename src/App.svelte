@@ -170,17 +170,17 @@
 			<Col>
 				<FormGroup>
 					<Label for="mavenText"><strong>Maven</strong></Label>
-					<p>&lt;dependencies&gt;<p>
-					<Input type="textarea" name="text" id="mavenText" class="codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
-					<p>&lt;/dependencies&gt;</p>
+					<p class="codeFont">&lt;dependencies&gt;<p>
+					<Input type="textarea" name="text" id="mavenText" class="codeFont codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
+					<p class="codeFont">&lt;/dependencies&gt;</p>
 				</FormGroup>
 			</Col>
 			<Col>
 				<FormGroup>
 					<Label for="gradleText"><strong>Gradle (Kotlin DSL)</strong></Label>
-					<p>dependencies &lbrace;<p>
-					<Input type="textarea" name="text" id="gradleText" class="codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
-					<p>&rbrace;</p>
+					<p class="codeFont">dependencies &lbrace;<p>
+					<Input type="textarea" name="text" id="gradleText" class="codeFont codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
+					<p class="codeFont">&rbrace;</p>
 				</FormGroup>
 			</Col>
 		</Row>
