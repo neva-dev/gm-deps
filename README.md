@@ -7,7 +7,7 @@ For Gradle & Maven - Two way.
 Install the dependencies...
 
 ```bash
-cd svelte-app
+cd gm-deps
 npm install
 ```
 
