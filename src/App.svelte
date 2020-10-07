@@ -1,10 +1,12 @@
 <script>
-	import { Jumbotron, Label, Input, FormGroup, Button, Col, Container, Row } from 'sveltestrap';
+	import { Alert, Jumbotron, Label, Input, FormGroup, Button, Col, Container, Row } from 'sveltestrap';
 	import xmlParser from 'fast-xml-parser';
 	const xmlComposer = new xmlParser.j2xParser({
 		format: true,
 		indentBy: "    ",
 	});
+
+	let alertText = '';
 
 	let mavenInvalid = false;
 	let mavenText = '';
@@ -15,6 +17,14 @@ implementation("org.jsoup:jsoup:$\{properties["jsoup.version"]}:apis")
 testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
 runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	`.trim()
+
+	function mavenParseXml(value) {
+		try {
+			return xmlParser.parse(value);
+		} catch (e) {
+			throw new Error("Cannot parse Maven XML properly!")
+		}
+	}
 
 	function mapMavenScope(value) {
 		return {
@@ -41,9 +51,11 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	}
 
 	function mavenUpdate() {
+		alertText = null;
 		mavenInvalid = false
+
 		try {
-			let xml = xmlParser.parse(mavenText);
+			let xml = mavenParseXml(mavenText);
 			let deps = xml.dependency instanceof Array ? xml.dependency : [xml.dependency];
 
 			gradleText = mapMavenProperties(deps.filter(dep => dep.groupId && dep.artifactId && dep.version)
@@ -59,7 +71,8 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 						return `${scope}("${result}")`
 					}).join("\n"));
 		} catch (e) {
-			console.error(e.message);
+			console.log(e)
+			alertText = e.message;
 			mavenInvalid = true
 		}
 	}
@@ -146,13 +159,14 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	}
 
 	function gradleUpdate() {
+		alertText = null;
 		gradleInvalid = false;
 		try {
 			mavenText = mapGradleProperties(xmlComposer.parse({
 				dependency: parseGradleLines(gradleText)
 			}));
 		} catch (e) {
-			console.error(e.message);
+			alertText = e.message;
 			gradleInvalid = true;
 		}
 	}
@@ -189,5 +203,10 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 				</FormGroup>
 			</Col>
 		</Row>
+		{#if alertText}
+			<Alert color="danger">
+				{alertText}
+			</Alert>
+		{/if}
 	</Container>
 </main>
