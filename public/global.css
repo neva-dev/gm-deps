@@ -1,0 +1,20 @@
+@media (min-width: 576px) {
+    .jumbotron {
+        padding: 1rem 1rem;
+    }
+}
+
+.codeFont {
+    font-family: "Courier New", "Courier";
+}
+
+.codeText {
+
+    font-size: 75%;
+}
+
+@media (min-width: 576px) {
+    .codeText {
+        min-height: 400px;
+    }
+}

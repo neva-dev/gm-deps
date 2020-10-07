@@ -19,6 +19,10 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	`.trim()
 
 	function mavenParseXml(value) {
+		if (!value) {
+			throw new Error("Specify Maven XML!")
+		}
+
 		try {
 			return xmlParser.parse(value);
 		} catch (e) {
@@ -58,7 +62,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 			let xml = mavenParseXml(mavenText);
 			let deps = xml.dependency instanceof Array ? xml.dependency : [xml.dependency];
 
-			gradleText = mapMavenProperties(deps.filter(dep => dep.groupId && dep.artifactId && dep.version)
+			gradleText = mapMavenProperties(deps.filter(dep => dep && dep.groupId && dep.artifactId && dep.version)
 					.map(dep => {
 						let scope = mapMavenScope(dep.scope);
 						let result = `${dep.groupId}:${dep.artifactId}:${dep.version}`;
@@ -78,6 +82,10 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	}
 
 	function parseGradleLines(lines) {
+		if (!lines) {
+			throw new Error("Specify Gradle dependencies!")
+		}
+
 		return lines.split("\n")
 				.map(l => l.trim())
 				.filter(l => l && l.length)
@@ -190,7 +198,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 				<FormGroup>
 					<Label for="mavenText"><strong>Maven</strong></Label>
 					<p class="codeFont">&lt;dependencies&gt;<p>
-					<Input readonly="false" type="textarea" name="text" id="mavenText" class="codeFont codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
+					<Input readonly="false" type="textarea" wrap="off" name="text" id="mavenText" class="codeFont codeText" bind:invalid={mavenInvalid} bind:value={mavenText} on:keyup={mavenUpdate}/>
 					<p class="codeFont">&lt;/dependencies&gt;</p>
 				</FormGroup>
 			</Col>
@@ -198,7 +206,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 				<FormGroup>
 					<Label for="gradleText"><strong>Gradle (Kotlin DSL)</strong></Label>
 					<p class="codeFont">dependencies &lbrace;<p>
-					<Input readonly="false" type="textarea" name="text" id="gradleText" class="codeFont codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
+					<Input readonly="false" type="textarea" wrap="off" name="text" id="gradleText" class="codeFont codeText" bind:invalid={gradleInvalid} bind:value={gradleText} on:keyup={gradleUpdate}/>
 					<p class="codeFont">&rbrace;</p>
 				</FormGroup>
 			</Col>
