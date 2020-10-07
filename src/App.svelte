@@ -59,6 +59,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 						return `${scope}("${result}")`
 					}).join("\n"));
 		} catch (e) {
+			console.error(e.message);
 			mavenInvalid = true
 		}
 	}
@@ -90,11 +91,19 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 		let type = null;
 		if (value.includes("@")) {
 			let parts = value.split("@");
+			if (parts.length > 2) {
+				throw new Error("Gradle dependency could not have more than one '@' character!")
+			}
+
 			value = parts[0];
 			type = parts[1];
 		}
 
 		let parts = value.split(":")
+		if (parts.length > 4) {
+			throw new Error("Gradle dependency could not have more than four ':' characters!")
+		}
+
 		let groupId = parts[0];
 		let artifactId = parts[1];
 		let version = parts[2];
@@ -118,7 +127,7 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 	}
 
 	function mapGradleProperties(value) {
-		const pattern = /\${([^}]+)}/g
+		const pattern = /\${properties\["([^}]+)"\]}/g
 		const matches = value.match(pattern)
 
 		let result = value;
@@ -143,12 +152,18 @@ runtimeOnly("com.adobe.cq:core.wcm.components.content:2.11.1@zip")
 				dependency: parseGradleLines(gradleText)
 			}));
 		} catch (e) {
+			console.error(e.message);
 			gradleInvalid = true;
 		}
 	}
 
 	gradleUpdate();
 </script>
+
+
+<svelte:head>
+	<title>Dependencies Converter for Gradle & Maven (two-way)</title>
+</svelte:head>
 
 <main>
 	<Jumbotron class="text-center">
